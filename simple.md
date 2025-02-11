@@ -61,6 +61,13 @@ fn create_menu(win: Window, menu_conf: Option<MenuFrame>) -> (Window, Option<mud
     }
 }
 
+fn create_system_tray_menu() -> Option<muda::Menu> {
+    let menu = muda::Menu::new();
+    let default_item = muda::MenuItem::new("Standard Tray-Option", true, None);
+    let _ = menu.append(&default_item);
+    Some(menu)
+}
+
 fn create_system_tray(muda_menu: Option<muda::Menu>, tray_conf: Option<SystemTray>) -> Option<tray_icon::TrayIcon> {
     if let Some(conf) = tray_conf {
         let mut tray_sys = tray_icon::TrayIconBuilder::new();
@@ -69,7 +76,9 @@ fn create_system_tray(muda_menu: Option<muda::Menu>, tray_conf: Option<SystemTra
             tray_sys = tray_sys.with_title(title);
         }
 
-        if let Some(menu) = muda_menu {
+        // Falls `muda_menu` None ist, wird `create_system_tray_menu` als Default genommen
+        let final_menu = muda_menu.or_else(create_system_tray_menu);
+        if let Some(menu) = final_menu {
             tray_sys = tray_sys.with_menu(Box::new(menu));
         }
 
@@ -105,20 +114,18 @@ fn create_webview(menu_conf: Option<MenuFrame>, tray_conf: Option<SystemTray>) {
 }
 
 fn main() {
- 
-    
-    // Case 1: System tray only
+    // Case 1: Nur System-Tray
+    create_webview(None, Some(SystemTray { title: Some("Tray".into()), icon: None, is_template: None, menu_on_left_click: None, tooltip: None, menu_config: None }));
 
-    // create_webview(None, Some(SystemTray { title: Some("Tray".into()), icon: None, is_template: None, menu_on_left_click: None, tooltip: None, menu_config: None }));
-
-    // Case 2: only Menü
+    // Case 2: Nur Menü
     // create_webview(Some(MenuFrame { item: MenuItem { text: "Option".into(), enabled: true, command: None } }), None);
 
-    // Case 3: Both (Menu & System Tray)
+    // Case 3: Beides (Menü & System Tray)
     // create_webview(Some(MenuFrame { item: MenuItem { text: "Option".into(), enabled: true, command: None } }), Some(SystemTray { title: Some("Tray".into()), icon: None, is_template: None, menu_on_left_click: None, tooltip: None, menu_config: None }));
 
-    // Case 4: Neither menu nor system tray
+    // Case 4: Weder Menü noch System-Tray
     // create_webview(None, None);
 }
+
 
 ```
